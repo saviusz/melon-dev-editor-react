@@ -6,6 +6,7 @@ export interface Params {
   onDelete: () => void;
   onChangeFocus: (direction: number) => void;
   onParagraphAdd: () => void;
+  onContentChange: (newConent: string) => void;
   outRef: (elem: HTMLParagraphElement | null) => void;
 }
 
@@ -15,14 +16,25 @@ function EditorParagraph({
   onChangeFocus,
   outRef,
   onParagraphAdd,
+  onContentChange,
 }: Params) {
   const p = useRef<HTMLParagraphElement | null>(null);
 
   const handleRightArrow = (e: KeyboardEvent) => {};
+
   const handleBackspace = (e: KeyboardEvent) => {
     if (checkCurrentLength() == 0) {
       e.preventDefault();
       onDelete();
+    }
+  };
+
+  const handleEnter = (e: KeyboardEvent) => {
+    if (!p.current) return;
+    if (p.current?.innerText.endsWith("\n")) {
+      p.current.innerText = p.current.innerText.trim();
+      e.preventDefault();
+      onParagraphAdd();
     }
   };
 
@@ -36,12 +48,13 @@ function EditorParagraph({
         return handleBackspace(event);
       case "RightArrow":
         return handleRightArrow(event);
-      case "a":
-        event.preventDefault();
-        return onParagraphAdd();
+      case "Enter":
+        return handleEnter(event);
     }
   }
-  function handleInput(event: FormEvent<HTMLParagraphElement>) {}
+  function handleInput(event: FormEvent<HTMLParagraphElement>) {
+    onContentChange(p.current?.innerText ?? "");
+  }
 
   return (
     <p
@@ -49,7 +62,7 @@ function EditorParagraph({
       contentEditable="true"
       suppressContentEditableWarning={true}
       onKeyDown={handleKeydown}
-      onInput={handleInput}
+      onBlur={handleInput}
       ref={(elem) => {
         outRef(elem);
         p.current = elem;

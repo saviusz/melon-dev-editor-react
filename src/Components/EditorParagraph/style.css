@@ -1,6 +1,11 @@
 .editor-paragraph {
     margin: 0;
     outline: none;
-
     width: 100%;
+
+    border-bottom: 1px solid rgba(0, 0, 0, 0.356);
+}
+
+.editor-paragraph:nth-child(2n) {
+background-color: rgba(0, 0, 0, 0.137);
 }

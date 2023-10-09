@@ -5,13 +5,17 @@ import { useEffect, useRef, useState } from "react";
 
 function SongEditor() {
   const [content, updateContent] = useImmer(["line 1", "line 2"]);
-  const paragraphs = useRef<Array<HTMLParagraphElement>>([]);
-  const [focus, setFocus] = useState<number | undefined>(undefined);
+
+  const paragraphs = useRef<Array<HTMLParagraphElement | null>>([]);
+
+  const [focus, setFocus] = useState<
+    { id: number; isSelectionOnEnd: boolean } | undefined
+  >(undefined);
 
   const handleParagraphDeletion = (index: number) => {
     if (content.length > 1) {
       updateContent(content.filter((_value, i) => i != index));
-      handleFocusChange(index - 1);
+      handleFocusChange(index - 1, true);
     }
   };
 
@@ -22,14 +26,34 @@ function SongEditor() {
     handleFocusChange(content.length);
   };
 
-  const handleFocusChange = (index: number) => {
-    setFocus(index);
+  const handleContentChange = (id: number, content: string) => {
+    updateContent((draft) => {
+      draft[id] = content;
+    });
+  };
+
+  const handleFocusChange = (index: number, end: boolean = false) => {
+    setFocus({ id: index, isSelectionOnEnd: end });
   };
 
   useEffect(() => {
     if (focus) {
-      paragraphs.current[focus].focus();
-      setFocus(undefined);
+      const p = paragraphs.current[focus.id];
+      if (p) {
+        p.focus();
+        const range = new Range();
+        range.setStart(
+          (!focus.isSelectionOnEnd ? p.firstChild : p.lastChild) ?? p,
+          focus.isSelectionOnEnd ? p.lastChild?.textContent?.length ?? 1 : 0
+        );
+        range.setEnd(
+          (!focus.isSelectionOnEnd ? p.firstChild : p.lastChild) ?? p,
+          focus.isSelectionOnEnd ? p.lastChild?.textContent?.length ?? 1 : 0
+        );
+        document.getSelection()?.removeAllRanges();
+        document.getSelection()?.addRange(range);
+        setFocus(undefined);
+      }
     }
   }, [focus]);
 
@@ -39,12 +63,15 @@ function SongEditor() {
         <EditorParagraph
           key={index}
           content={p}
-          onChangeFocus={(dir: number) => handleFocusChange(index + dir)}
+          onChangeFocus={(dir: number) =>
+            handleFocusChange(index + dir, dir > 0)
+          }
           onDelete={() => handleParagraphDeletion(index)}
           onParagraphAdd={() => handleParagraphAddition()}
-          outRef={(elem: HTMLParagraphElement) => {
-            paragraphs.current[index] = elem;
-          }}
+          onContentChange={(c) => handleContentChange(index, c)}
+          outRef={(elem: HTMLParagraphElement | null) =>
+            (paragraphs.current[index] = elem)
+          }
         />
       ))}
     </div>

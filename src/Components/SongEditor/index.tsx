@@ -2,10 +2,16 @@ import "./style.css";
 import EditorParagraph from "../EditorParagraph";
 import { useImmer } from "use-immer";
 import { useEffect, useRef, useState } from "react";
+import { Part, PartType } from "../../models/Parts";
+import { selectStart, selectEnd } from "../../helpers/select";
 
-function SongEditor() {
-  const [content, updateContent] = useImmer(["line 1", "line 2"]);
+interface Params {
+  content: Part[];
+  onSave: (data: Part[]) => void;
+}
 
+function SongEditor({ content: initContent }: Params) {
+  const [content, updateContent] = useImmer(initContent);
   const paragraphs = useRef<Array<HTMLParagraphElement | null>>([]);
 
   const [focus, setFocus] = useState<
@@ -21,17 +27,16 @@ function SongEditor() {
 
   const handleParagraphAddition = () => {
     updateContent((draft) => {
-      draft.push("");
+      draft.push(new Part(PartType.Verse, []));
     });
     handleFocusChange(content.length);
   };
 
-  const handleContentChange = (id: number, content: string) => {
+  const handleContentChange = (id: number, content: Part) => {
     updateContent((draft) => {
       draft[id] = content;
     });
   };
-
   const handleFocusChange = (index: number, end: boolean = false) => {
     setFocus({ id: index, isSelectionOnEnd: end });
   };
@@ -41,15 +46,7 @@ function SongEditor() {
       const p = paragraphs.current[focus.id];
       if (p) {
         p.focus();
-        const range = new Range();
-        range.setStart(
-          (!focus.isSelectionOnEnd ? p.firstChild : p.lastChild) ?? p,
-          focus.isSelectionOnEnd ? p.lastChild?.textContent?.length ?? 1 : 0
-        );
-        range.setEnd(
-          (!focus.isSelectionOnEnd ? p.firstChild : p.lastChild) ?? p,
-          focus.isSelectionOnEnd ? p.lastChild?.textContent?.length ?? 1 : 0
-        );
+        const range = focus.isSelectionOnEnd ? selectEnd(p) : selectStart(p);
         document.getSelection()?.removeAllRanges();
         document.getSelection()?.addRange(range);
         setFocus(undefined);
@@ -63,12 +60,9 @@ function SongEditor() {
         <EditorParagraph
           key={index}
           content={p}
-          onChangeFocus={(dir: number) =>
-            handleFocusChange(index + dir, dir > 0)
-          }
           onDelete={() => handleParagraphDeletion(index)}
-          onParagraphAdd={() => handleParagraphAddition()}
-          onContentChange={(c) => handleContentChange(index, c)}
+          onAddNewPart={() => handleParagraphAddition()}
+          onContentUpdate={(c) => handleContentChange(index, c)}
           outRef={(elem: HTMLParagraphElement | null) =>
             (paragraphs.current[index] = elem)
           }

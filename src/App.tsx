@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./App.css";
 import SongEditor from "./Components/SongEditor";
 import { Part, PartType, Line, CoreNote, Chord } from "./models/Parts";
@@ -7,7 +6,7 @@ const chord = new Chord(CoreNote.a, false);
 
 const initialContent = [
   new Part(PartType.Verse, [
-    new Line("Linijka 1", [chord]),
+    new Line("Linijka 1", [chord, new Chord(CoreNote.c, true)]),
     new Line("Linijka 2", [chord]),
     new Line("Linijka 3", [chord]),
     new Line("Linijka 4", [chord]),

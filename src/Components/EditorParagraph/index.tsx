@@ -1,4 +1,4 @@
-import { FormEvent, KeyboardEvent, useRef, useState } from "react";
+import { KeyboardEvent, useRef, useState } from "react";
 import "./style.css";
 import { Part, PartType } from "../../models/Parts";
 

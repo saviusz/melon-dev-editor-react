@@ -38,8 +38,37 @@ export enum CoreNote {
 }
 
 export class Chord {
+  private static listOfNames: Map<string, Chord>;
+  static get possibleNames() {
+    if (this.listOfNames) return this.listOfNames;
+    const map = new Map<string, Chord>();
+    for (const note of Object.keys(CoreNote)) {
+      const keyNote = note as keyof typeof CoreNote;
+      const variations = [
+        new Chord(CoreNote[keyNote], false),
+        new Chord(CoreNote[keyNote], true),
+      ];
+      variations.forEach((v) => {
+        map.set(v.getPolishNotation(), v);
+      });
+    }
+    this.listOfNames = map;
+    return this.listOfNames;
+  }
+
+  static fromString(input: string) {
+    return this.possibleNames.get(input) as Chord;
+  }
+
   constructor(
     public readonly coreNote: CoreNote,
     public readonly isMinor: boolean
   ) {}
+
+  getPolishNotation() {
+    const output = this.isMinor
+      ? this.coreNote.toString()
+      : this.coreNote.toString().toUpperCase();
+    return output;
+  }
 }

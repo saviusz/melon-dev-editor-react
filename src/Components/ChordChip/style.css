@@ -1,0 +1,7 @@
+.chord-chip {
+    display: inline-block;
+    background-color: #9fffd4;
+    border-radius: 10px;
+    margin: 0;
+    padding-inline: 5px;
+}

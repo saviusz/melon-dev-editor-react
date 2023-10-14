@@ -1,14 +1,14 @@
 .editor-paragraph {
-  margin: 10px 0;
+  margin: 0;
   padding-left: 15px;
   outline: none;
   width: 100%;
 
-  border-block: 1px solid rgba(0, 0, 0, 0.11);
+  /* border-block: 1px solid rgba(0, 0, 0, 0.11); */
   white-space: pre;
 }
 
-.editor-paragraph:nth-child(2n) {
+.editor-paragraph:nth-of-type(2n) {
   background-color: rgba(0, 0, 0, 0.137);
 }
 

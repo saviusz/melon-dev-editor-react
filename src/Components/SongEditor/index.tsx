@@ -4,6 +4,7 @@ import { useImmer } from "use-immer";
 import { useEffect, useRef, useState } from "react";
 import { Part, PartType } from "../../models/Parts";
 import { selectStart, selectEnd } from "../../helpers/select";
+import TempChordBlock from "../TempChordBlock";
 
 interface Params {
   content: Part[];
@@ -57,16 +58,25 @@ function SongEditor({ content: initContent }: Params) {
   return (
     <div className="song-editor">
       {content.map((p, index) => (
-        <EditorParagraph
-          key={index}
-          content={p}
-          onDelete={() => handleParagraphDeletion(index)}
-          onAddNewPart={() => handleParagraphAddition()}
-          onContentUpdate={(c) => handleContentChange(index, c)}
-          outRef={(elem: HTMLParagraphElement | null) =>
-            (paragraphs.current[index] = elem)
-          }
-        />
+        <>
+          <EditorParagraph
+            key={index}
+            content={p}
+            onDelete={() => handleParagraphDeletion(index)}
+            onAddNewPart={() => handleParagraphAddition()}
+            onContentUpdate={(c) => handleContentChange(index, c)}
+            outRef={(elem: HTMLParagraphElement | null) =>
+              (paragraphs.current[index] = elem)
+            }
+          />
+          <TempChordBlock
+            part={p}
+            onUpdate={(p) => {
+              handleContentChange(index, p);
+            }}
+            // outRef={() => {}}
+          />
+        </>
       ))}
     </div>
   );
